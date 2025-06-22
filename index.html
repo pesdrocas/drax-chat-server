@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>drax9 sistem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #000;
+      --red: #ff1a1a;
+      --text: #fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    #loading-screen img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    #loading-screen span {
+      color: var(--red);
+      font-size: 1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #0a0a0a;
+      border-bottom: 1px solid var(--red);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 999;
+      animation: fadeDown 0.8s ease;
+      overflow: hidden;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo fixa na esquerda */
+    header img {
+      height: 60px;
+      filter: drop-shadow(0 0 5px red);
+      flex-shrink: 0;
+      position: fixed;
+      left: 20px;
+      top: 10px;
+      z-index: 1000;
+      background: #0a0a0a;
+      border-radius: 6px;
+    }
+
+    nav {
+      margin-left: 110px; /* espaço para a logo fixa */
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--red) transparent;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 1;
+    }
+
+    nav::-webkit-scrollbar {
+      height: 6px;
+    }
+    nav::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    nav::-webkit-scrollbar-thumb {
+      background-color: var(--red);
+      border-radius: 3px;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--red);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 10px 15px;
+      transition: transform 0.3s, color 0.3s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    nav button:hover {
+      color: var(--text);
+      transform: scale(1.1);
+      text-shadow: 0 0 5px var(--red);
+    }
+
+    .container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      margin-top: 80px; /* altura do header */
+    }
+
+    .slides {
+      display: flex;
+      width: 500vw; /* 5 slides */
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .slide {
+      flex: 1 0 100vw;
+      height: 100vh;
+      padding: 140px 30px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide h1::after {
+      content: "_";
+      animation: blink 1s infinite steps(2, start);
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    .slide h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: var(--red);
+    }
+
+    .slide p {
+      font-size: 1.1rem;
+      max-width: 600px;
+      color: #bbb;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    iframe {
+      width: 100%;
+      max-width: 400px;
+      height: 80px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    a.link {
+      color: #fff;
+      background: var(--red);
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+
+    a.link:hover {
+      background: #cc0000;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      color: #444;
+    }
+
+    /* === Chatbot styles inside slide === */
+    #chatbot-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 400px;
+      width: 100%;
+      background: #0a0a0a;
+      border: 2px solid var(--red);
+      border-radius: 8px;
+      box-shadow: 0 0 10px var(--red);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    #chatbot-messages {
+      flex: 1;
+      padding: 10px;
+      background: #111;
+      overflow-y: auto;
+      font-size: 0.9rem;
+    }
+
+    #chatbot-messages .user-msg {
+      text-align: right;
+      margin: 6px 0;
+    }
+    #chatbot-messages .user-msg span {
+      background: var(--red);
+      color: #000;
+      padding: 6px 12px;
+      border-radius: 15px 15px 0 15px;
+      display: inline-block;
+      max-width: 80%;
+    }
+    #chatbot-messages .bot-msg {
+      text-align: left;
+      margin: 6px 0;
+    }
+    #chatbot-messages .bot-msg span {
+      background: #222;
+      color: var(--red);
+      padding: 6px 12px;
+      border-radius: 15px 15px 15px 0;
+      display: inline-block;
+      max-width: 80%;
+    }
+
+    #chatbot-form {
+      display: flex;
+      border-top: 1px solid #333;
+    }
+
+    #chatbot-input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      font-size: 1rem;
+      background: #111;
+      color: #fff;
+      border-radius: 0 0 0 8px;
+      outline: none;
+    }
+
+    #chatbot-input::placeholder {
+      color: #666;
+    }
+
+    #chatbot-form button {
+      background: var(--red);
+      border: none;
+      padding: 0 15px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #000;
+      border-radius: 0 0 8px 0;
+      transition: background 0.3s;
+    }
+
+    #chatbot-form button:hover {
+      background: #cc0000;
+    }
+
+    @media (max-width: 600px) {
+      .slide h1 {
+        font-size: 1.5rem;
+      }
+      .slide p {
+        font-size: 1rem;
+      }
+      #chatbot-container {
+        max-width: 90vw;
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <img src="https://media.giphy.com/media/BiHxKaTKOmTDRnhgq7/giphy.gif" alt="loading gif" />
+    <span>carregando</span>
+  </div>
+
+  <audio id="click-sound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c9f3bb84ce.mp3" preload="auto"></audio>
+
+  <header>
+    <img src="logo.png" alt="drax9 logo" />
+    <nav>
+      <button onclick="playSound(); goToSlide(0)">Bot Drax</button>
+      <button onclick="playSound(); goToSlide(1)">Sobre o Criador</button>
+      <button onclick="playSound(); goToSlide(2)">Playlist</button>
+      <button onclick="playSound(); goToSlide(3)">WhatsApp</button>
+      <button onclick="playSound(); goToSlide(4)">Drax chat v1</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="slides" id="slides">
+      <section class="slide">
+        <h1>🤖 Bot Drax</h1>
+        <p>Em breve...</p>
+      </section>
+      <section class="slide">
+        <h1>🧠 Sobre o Criador</h1>
+        <p>Meu nome é Drax, sou programador, hacker ético e designer, crio softwares e automação tanto no Discord quanto no WhatsApp.</p>
+      </section>
+      <section class="slide">
+        <h1>🎧 Playlist</h1>
+        <p>Criei essa playlist pra você ouvir enquanto o site não atualiza...</p>
+        <iframe src="https://open.spotify.com/embed/playlist/27JESEToLAY938Lu1wJqMt?utm_source=generator"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </section>
+      <section class="slide">
+        <h1>💬 WhatsApp</h1>
+        <p>Clique abaixo para entrar em contato comigo.</p>
+        <a class="link" href="https://wa.me/553398702583" target="_blank">Abrir WhatsApp</a>
+      </section>
+      <section class="slide">
+        <h1>💬 Drax chat v1</h1>
+        <div id="chatbot-container">
+          <div id="chatbot-messages"></div>
+          <form id="chatbot-form">
+            <input type="text" id="chatbot-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
+            <button type="submit">Enviar</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <small>// drax9 sistem ©2025 – I did for you.</small>
+  </footer>
+
+  <script>
+    function goToSlide(index) {
+      const slides = document.getElementById('slides');
+      slides.style.transform = `translateX(-${index * 100}vw)`;
+    }
+
+    function playSound() {
+      const sound = document.getElementById('click-sound');
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+      }, 2500);
+
+      const form = document.getElementById('chatbot-form');
+      const input = document.getElementById('chatbot-input');
+      const messages = document.getElementById('chatbot-messages');
+
+      function addMessage(text, sender = 'bot') {
+        const div = document.createElement('div');
+        div.className = sender === 'bot' ? 'bot-msg' : 'user-msg';
+        const span = document.createElement('span');
+        span.textContent = text;
+        div.appendChild(span);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      // Respostas expandidas e variadas
+      const respostas = {
+        'oi': 'Fala, mano! Como posso ajudar você hoje?',
+        'ola': 'Olá! Em que posso ser útil para você?',
+        'tudo bem': 'Tudo ótimo! E com você, como está?',
+        'quem é você': 'Eu sou o Bot Drax, seu assistente virtual dedicado a te ajudar.',
+        'bot': 'Sim, sou eu mesmo! O Bot Drax está aqui para te ajudar.',
+        'ajuda': 'Pode perguntar qualquer coisa, estou aqui para ajudar no que puder.',
+        'obrigado': 'De nada! Sempre que precisar, é só chamar.',
+        'valeu': 'Valeu! Conte comigo para o que precisar.',
+        'adeus': 'Até mais! Espero falar com você em breve.',
+        'como você funciona': 'Eu respondo suas perguntas com respostas pré-definidas, mas estou sempre aprendendo!',
+        'o que você sabe': 'Sei responder perguntas simples, conversar sobre programação, música e mais.',
+        'qual seu nome': 'Meu nome é Bot Drax, prazer em te conhecer!',
+        'drax': 'Drax é o criador desse site e um cara muito talentoso!',
+        'discord': 'Ainda não tenho integração com Discord, mas quem sabe no futuro.',
+        'whatsapp': 'Você pode falar comigo pelo WhatsApp clicando no menu acima!',
+        'musica': 'Adoro uma boa playlist! Dá uma olhada na aba de playlist.',
+        'site': 'Este é o site oficial do drax9 sistem, com várias funcionalidades.',
+        'programação': 'Sou fã de programação! Se quiser, posso responder dúvidas básicas.',
+        'qual sua linguagem favorita': 'Eu curto JavaScript, pois é a base para este site interativo.',
+        'piada': 'Por que o programador sempre confunde Halloween com Natal? Porque OCT 31 == DEC 25!',
+        'piada engraçada': 'O que um bit disse para o outro? "Você me deixa bit-bit-bit!"',
+        'bom dia': 'Bom dia! Espero que seu dia seja incrível.',
+        'boa noite': 'Boa noite! Durma bem e sonhe com códigos.',
+        'obrigado drax': 'De nada! É um prazer ajudar.',
+      };
+
+      // Frases alternativas para respostas
+      const respostasAlternativas = {
+        'oi': ['E aí! Como posso ajudar?', 'Olá, tudo certo?', 'Oi, em que posso ajudar?'],
+        'ola': ['Olá! Precisa de algo?', 'Oi, tudo bem?', 'E aí, como posso ajudar?'],
+        'tudo bem': ['Estou ótimo, obrigado!', 'Tudo bem por aqui, e você?', 'Estou bem, e aí?'],
+        'obrigado': ['Disponha!', 'Sempre à disposição!', 'De nada, parceiro!'],
+        'valeu': ['Valeu, amigo!', 'Fico feliz em ajudar!', 'Conte comigo!'],
+      };
+
+      function getResposta(text) {
+        if(respostas[text]) {
+          // Se tiver alternativas e for uma das keys
+          if(respostasAlternativas[text]) {
+            const arr = respostasAlternativas[text];
+            // Sorteia uma alternativa
+            return arr[Math.floor(Math.random() * arr.length)];
+          }
+          return respostas[text];
+        }
+        // Resposta padrão
+        return 'Não entendi, tenta outra coisa ou digite "ajuda".';
+      }
+
+      addMessage('Olá! Eu sou o Bot Drax. Pergunta algo ou diga "ajuda".');
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const userText = input.value.trim().toLowerCase();
+        if(!userText) return;
+        addMessage(input.value, 'user');
+        input.value = '';
+
+        setTimeout(() => {
+          const resp = getResposta(userText);
+          addMessage(resp, 'bot');
+        }, 600);
+      });
+    });
+  </script>
+</body>
+</html>
